@@ -1,0 +1,3 @@
+{
+    "search_consideration": "Given the search phrase {} and following snippets of the links: \n{}\n Give me the link number to follow. Format your answer in markdown as follows:\nlink_num: 1"
+}

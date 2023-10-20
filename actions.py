@@ -7,6 +7,7 @@ import time
 from trafilatura import extract
 from config import Config
 import tiktoken
+from typing import List
 
 ENCODING = tiktoken.encoding_for_model(Config.MODEL_NAME)
 
@@ -25,14 +26,18 @@ def get_page_source(selenium_session: webdriver, some_url: str, sleep_time: int=
         return None
 
 
-def search_info(selenium_session: webdriver, search_concept: str, current_url: str):
+def search_info(selenium_session: webdriver, search_concept: str, visited_urls: List[str]):
     """
     Returns the links of a given search concept
     """
     search_engine = Config.SERCH_ENGINE
     selenium_session.get(search_engine)
-    searchbox = selenium_session.find_element(by=Config.SEARCH_INPUT["by"], 
-                                                     value=Config.SEARCH_INPUT["value"])
+    try:
+        searchbox = selenium_session.find_element(by=Config.SEARCH_INPUT_CLASSIC["by"], 
+                                                        value=Config.SEARCH_INPUT_CLASSIC["value"])
+    except:
+        searchbox = selenium_session.find_element(by=Config.SEARCH_INPUT_INPUT["by"], 
+                                                        value=Config.SEARCH_INPUT_INPUT["value"])
     searchbox.send_keys(search_concept)
     searchbox.send_keys(Keys.ENTER)
     results = selenium_session.find_element(by=Config.SEARCH_RESULTS["by"], 
@@ -44,7 +49,8 @@ def search_info(selenium_session: webdriver, search_concept: str, current_url: s
                      "link": link,
                      "adress": link.find_element(by=Config.LINKS_ADRESS["by"],
                                                  value=Config.LINKS_ADRESS["value"]).get_attribute("href")} for link in search_links]
-    search_links = [link for link in search_links if link["adress"] != current_url]
+    search_links = [link for link in search_links if link["adress"] not in visited_urls]
+    
     link_synopsis = "\n".join([f"{i+1}. {link['text']}" for i, link in enumerate(search_links)])
     return search_links, link_synopsis
 

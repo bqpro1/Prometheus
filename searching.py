@@ -4,7 +4,7 @@ from colorama import Fore, Style
 import json
 import openai
 from selenium import webdriver
-from time import sleep
+from typing import List
 
 READ_PROMPTS = json.load(open("read_prompts.json", "r"))
 SEARCH_PROMPTS = json.load(open("search_prompts.json", "r"))
@@ -12,15 +12,15 @@ model = Config.MODEL_NAME
 
 def search(selenium_session: webdriver, 
            search_concept: str,
-           context_link: str):
+           visited_urls: List[str]):
     
     selenium_session.get(Config.SERCH_ENGINE)
-    sleep(10)
+    selenium_session.implicitly_wait(10)
     print(Style.BRIGHT + Fore.LIGHTWHITE_EX + f"I am looking for info about {search_concept}", end="\n\n")
     
     search_links, link_synopsis = search_info(selenium_session, 
                                               search_concept, 
-                                              context_link)
+                                              visited_urls)
 
 
     search_messages = [{"role": "system", "content": READ_PROMPTS["navigator_manifest"]},

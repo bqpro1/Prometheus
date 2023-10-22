@@ -10,9 +10,13 @@ READ_PROMPTS = json.load(open("read_prompts.json", "r"))
 SEARCH_PROMPTS = json.load(open("search_prompts.json", "r"))
 model = Config.MODEL_NAME
 
+
 def search(selenium_session: webdriver, 
            search_concept: str,
            visited_urls: List[str]):
+    """
+    Uses given search engine to look for a given concept
+    """
     
     selenium_session.get(Config.SERCH_ENGINE)
     selenium_session.implicitly_wait(10)
@@ -33,8 +37,6 @@ def search(selenium_session: webdriver,
     )
 
     search_link_num = raw_search_link_num["choices"][0]["message"]["content"]
-    
-    #print(Style.BRIGHT + Fore.LIGHTYELLOW_EX + search_link_num, end="\n\n")
     
     assert search_link_num[-1].isdigit()
     link_index = int(search_link_num[-1])

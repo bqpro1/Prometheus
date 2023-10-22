@@ -7,7 +7,7 @@ from colorama import Fore, Style
 import openai
 import json
 
-config = json.load(open("/Users/leszekbukowski/openai/config.json", "r"))
+config = json.load(open("local_config.json", "r"))
 openai.api_key = config["KEY"]
 
 def run_prometheus(visited_urls: List[str] = []):

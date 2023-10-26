@@ -10,7 +10,7 @@ import json
 config = json.load(open("local_config.json", "r"))
 openai.api_key = config["KEY"]
 
-def run_prometheus(visited_urls: List[str] = []):
+def run_prometheus(visited_urls: List[str] = [], request_sep: str = "?"):
     """
     Runs the Prometheus bot
     """
@@ -21,7 +21,7 @@ def run_prometheus(visited_urls: List[str] = []):
 
     while True:
         concept = read(readS, actual_url)
-        if "?" in actual_url:
+        if request_sep in actual_url:
             actual_url = actual_url.split("?")[0]
         else:
             pass

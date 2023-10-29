@@ -10,14 +10,16 @@ import json
 config = json.load(open("local_config.json", "r"))
 openai.api_key = config["KEY"]
 
-def run_prometheus(visited_urls: List[str] = [], request_sep: str = "?"):
+def run_prometheus(headless: bool,
+                   visited_urls: List[str] = [], 
+                   request_sep: str = "?"):
     """
     Runs the Prometheus bot
     """
 
     actual_url = input(Fore.GREEN + Style.BRIGHT + "What is the url you want to start from? ")
-    readS = start_session(headless=True)
-    searchS = start_session(headless=True)
+    readS = start_session(headless=headless)
+    searchS = start_session(headless=headless)
 
     while True:
         concept = read(readS, actual_url)
@@ -35,4 +37,3 @@ def run_prometheus(visited_urls: List[str] = [], request_sep: str = "?"):
 
 if __name__ == "__main__":
     Fire(run_prometheus)
-

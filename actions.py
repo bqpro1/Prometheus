@@ -28,7 +28,7 @@ def get_page_source(selenium_session: webdriver, some_url: str, sleep_time: int=
 
 def search_info(selenium_session: webdriver, search_concept: str, visited_urls: List[str]):
     """
-    Returns the links of a given search concept
+    Returns the links of a given search concept using a search engine
     """
     search_engine = Config.SERCH_ENGINE
     selenium_session.get(search_engine)

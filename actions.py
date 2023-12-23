@@ -12,7 +12,9 @@ from typing import List
 ENCODING = tiktoken.encoding_for_model(Config.MODEL_NAME)
 
 
-def get_page_source(selenium_session: webdriver, some_url: str, sleep_time: int=1):
+def get_page_source(selenium_session: webdriver,
+                    some_url: str,
+                    sleep_time: int=1) -> str:
     """
     Returns the page source of a given url
     """
@@ -26,7 +28,9 @@ def get_page_source(selenium_session: webdriver, some_url: str, sleep_time: int=
         return None
 
 
-def search_info(selenium_session: webdriver, search_concept: str, visited_urls: List[str]):
+def search_info(selenium_session: webdriver, 
+                search_concept: str,
+                visited_urls: List[str]) -> tuple:
     """
     Returns the links of a given search concept using a search engine
     """
@@ -52,7 +56,7 @@ def search_info(selenium_session: webdriver, search_concept: str, visited_urls: 
     search_links = [link for link in search_links if link["adress"] not in visited_urls]
     
     link_synopsis = "\n".join([f"{i+1}. {link['text']}" for i, link in enumerate(search_links)])
-    return search_links, link_synopsis
+    return (search_links, link_synopsis)
 
 
 def get_links(selenium_session: webdriver):
@@ -64,8 +68,8 @@ def get_links(selenium_session: webdriver):
         
 
 def text_extract(page_source: str, 
-                 token_limit: int = 10000, 
-                 text_cut: int = 50000):
+                 token_limit: int = 8000, 
+                 text_cut: int = 6000) -> str:
     
     """
     Returns the text of a given page source

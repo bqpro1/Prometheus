@@ -10,4 +10,5 @@ class Config:
     SEARCH_RESULTS = {"by": "id", "value": "react-layout"}
     SEARCH_LINKS = {"by": "tag name", "value": "li"}
     LINKS_ADRESS = {"by": "tag name", "value": "a"}
-    MODEL_NAME = "gpt-3.5-turbo-16k-0613"
+    #MODEL_NAME = "gpt-4-1106-preview"
+    MODEL_NAME = "gpt-3.5-turbo-0613"

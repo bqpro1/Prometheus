@@ -6,8 +6,8 @@ import openai
 from selenium import webdriver
 from typing import List
 
-READ_PROMPTS = json.load(open("read_prompts.json", "r"))
-SEARCH_PROMPTS = json.load(open("search_prompts.json", "r"))
+READ_PROMPTS = json.load(open(Config.READ_PROMPT_PATH, "r"))
+SEARCH_PROMPTS = json.load(open(Config.SEARCH_PROMPT_PATH, "r"))
 model = Config.MODEL_NAME
 
 

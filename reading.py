@@ -16,7 +16,7 @@ console = Console()
 def read(selenium_session: webdriver, 
          reading_url: str, 
          link_limit: int = 100,
-         temp: float = 0.4) -> dict:
+         temp: float = 0.5) -> dict:
     
     page_source = get_page_source(selenium_session=selenium_session, some_url=reading_url)
     text = text_extract(page_source)

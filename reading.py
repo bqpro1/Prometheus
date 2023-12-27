@@ -5,11 +5,13 @@ from actions import get_page_source, get_links, text_extract
 import json
 from memory import MEMORIES, structure_memory
 from config import Config
-from pseudo_functions import should_search
 from colorama import Fore, Style
+from rich.console import Console
+from rich.markdown import Markdown
 
 READ_PROMPTS = json.load(open(Config.READ_PROMPT_PATH, "r"))
 model = Config.MODEL_NAME
+console = Console()
 
 def read(selenium_session: webdriver, 
          reading_url: str, 
@@ -39,8 +41,8 @@ def read(selenium_session: webdriver,
     )
 
     page_memories = raw_page_memories["choices"][0]["message"]["content"]
-    
-    print(Style.BRIGHT + Fore.LIGHTGREEN_EX + page_memories, end="\n\n")
+    console.print(Markdown(page_memories))
+    #print(Style.BRIGHT + Fore.LIGHTGREEN_EX + page_memories, end="\n\n")
     
     MEMORIES["theses"].append(structure_memory(page_memories, reading_url))
     

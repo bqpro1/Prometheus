@@ -3,12 +3,13 @@ from attr import dataclass
 
 @dataclass
 class Config:
-    USER_AGENTS_PATH = "user_agents.json"
+    USER_AGENTS_PATH = "data/user_agents.json"
     SERCH_ENGINE = "https://duckduckgo.com/"
     SEARCH_INPUT_CLASSIC = {"by": "id", "value": "searchbox_input"}
     SEARCH_INPUT_INPUT = {"by": "id", "value": "search_form_input_homepage"}
     SEARCH_RESULTS = {"by": "id", "value": "react-layout"}
     SEARCH_LINKS = {"by": "tag name", "value": "li"}
     LINKS_ADRESS = {"by": "tag name", "value": "a"}
-    #MODEL_NAME = "gpt-4-1106-preview"
-    MODEL_NAME = "gpt-3.5-turbo-0613"
+    MODEL_NAME = "gpt-4-1106-preview"
+    READ_PROMPT_PATH = "prompts/read_prompts.json"
+    SEARCH_PROMPT_PATH = "prompts/search_prompts.json"

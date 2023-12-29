@@ -68,8 +68,8 @@ def get_links(selenium_session: webdriver):
         
 
 def text_extract(page_source: str, 
-                 token_limit: int = 8000, 
-                 text_cut: int = 6000) -> str:
+                 token_limit: int = 128000, 
+                 text_cut: int = 100000) -> str:
     
     """
     Returns the text of a given page source

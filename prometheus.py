@@ -1,3 +1,4 @@
+from dotenv import load_dotenv
 from reading import read
 from searching import search
 from session_manager import start_session
@@ -5,14 +6,16 @@ from fire import Fire
 from typing import List
 from colorama import Fore, Style
 import openai
-import json
+import os
 
-config = json.load(open("local_config.json", "r"))
-openai.api_key = config["KEY"]
+load_dotenv()
+API_KEY = os.getenv("API_KEY")
+openai.api_key = API_KEY
+
 
 def run_prometheus(headless: bool,
-                   visited_urls: List[str] = [], 
-                   request_sep: str = "?"):
+                    visited_urls: List[str] = [], 
+                    request_sep: str = "?"):
     """
     Runs the Prometheus bot
     """

@@ -13,7 +13,7 @@ The bot is in its infancy: no memory, no ability to modify its prompts, and no a
 1. **Clone the repository**: `git clone git@github.com:bqpro1/Prometheus.git`
 2. **Install chrome driver (I did not test other drivers).**
     - For Windows, download the driver from [here](https://googlechromelabs.github.io/chrome-for-testing/), and after extracting the zip file, copy the chromedriver.exe to the Windows folder.
-    - For macOS, the best way is to use brew: `brew install --cask chrome driver`. I also had to do [this](https://stackoverflow.com/questions/60362018/macos-catalinav-10-15-3-error-chromedriver-cannot-be-opened-because-the-de).
+    - For macOS, the best way is to use brew: `brew install --cask chrome driver`. I also had to do [this](https://timonweb.com/misc/fixing-error-chromedriver-cannot-be-opened-because-the-developer-cannot-be-verified-unable-to-launch-the-chrome-browser-on-mac-os/).
 3. **Create a virtual environment (I used conda)**: `conda create -n prometheus python=3.11`. 
 4. **Install the requirements: `pip install -r requirements.txt`**.
 

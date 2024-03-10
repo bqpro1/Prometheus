@@ -1,0 +1,9 @@
+// The Prometheus System
+digraph Prometheus {
+	R [label="Read Module"]
+	S [label="Search Module"]
+	R -> S [label="Need Search"]
+	S -> R [label="Need Read"]
+	R -> R [label="No Search"]
+	S -> S [label="Not Found"]
+}

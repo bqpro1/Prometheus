@@ -5,12 +5,12 @@ from session_manager import start_session
 from fire import Fire
 from typing import List
 from colorama import Fore, Style
-import openai
+from openai import OpenAI
 import os
 
 load_dotenv()
 API_KEY = os.getenv("API_KEY")
-openai.api_key = API_KEY
+client = OpenAI(api_key=API_KEY)
 
 
 def run_prometheus(headless: bool,
@@ -25,7 +25,11 @@ def run_prometheus(headless: bool,
     searchS = start_session(headless=headless)
 
     while True:
-        concept = read(readS, actual_url)
+        
+        concept = read(selenium_session=readS,
+                       openai=client,
+                       reading_url=actual_url)
+        
         if request_sep in actual_url:
             actual_url = actual_url.split("?")[0]
         else:
@@ -35,7 +39,11 @@ def run_prometheus(headless: bool,
             actual_url = concept["link2follow"]
         elif concept["search_for"]:
             concept = concept["search_for"]
-            link2content4read = search(searchS, concept, visited_urls)
+            
+            link2content4read = search(selenium_session=searchS, 
+                                       openai=client, 
+                                       search_concept=concept, 
+                                       visited_urls=visited_urls)
             actual_url = link2content4read
 
 if __name__ == "__main__":

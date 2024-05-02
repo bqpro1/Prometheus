@@ -1,5 +1,5 @@
 
-import openai
+from openai import OpenAI
 from selenium import webdriver
 from actions import get_page_source, get_links, text_extract
 import json
@@ -14,6 +14,7 @@ model = Config.MODEL_NAME
 console = Console()
 
 def read(selenium_session: webdriver, 
+         openai: OpenAI,
          reading_url: str, 
          link_limit: int = 100,
          temp: float = 0.5) -> dict:
@@ -34,13 +35,13 @@ def read(selenium_session: webdriver,
 
 
     # Generates memories from the content of the page
-    raw_page_memories = openai.ChatCompletion.create(
+    raw_page_memories = openai.chat.completions.create(
         model=model,
         temperature=temp,
         messages=messages
     )
 
-    page_memories = raw_page_memories["choices"][0]["message"]["content"]
+    page_memories = raw_page_memories.choices[0].message.content
     console.print(Markdown(page_memories))
     #print(Style.BRIGHT + Fore.LIGHTGREEN_EX + page_memories, end="\n\n")
     
@@ -51,14 +52,14 @@ def read(selenium_session: webdriver,
 
 
     # Generates the question to ask
-    generated_question = openai.ChatCompletion.create(
+    generated_question = openai.chat.completions.create(
         model=model,
         temperature=temp,
         messages=messages
     )
 
 
-    current_question = generated_question["choices"][0]["message"]["content"]
+    current_question = generated_question.choices[0].message.content
     
     print(Style.BRIGHT + Fore.YELLOW + current_question, end="\n\n")
     
@@ -69,15 +70,14 @@ def read(selenium_session: webdriver,
 
 
     # Make decision about the futher steps
-    #filtered_messages = [messages[0], messages[-1]]
-    raw_decision = openai.ChatCompletion.create(
+    raw_decision = openai.chat.completions.create(
         model=model,
         temperature=1,
         messages=messages,
         response_format={ "type": "json_object" }
     )
 
-    decision = json.loads(raw_decision["choices"][0]["message"]["content"])
+    decision = json.loads(raw_decision.choices[0].message.content)
     print(decision, end="\n\n")
     
     if decision.get("link_num"):

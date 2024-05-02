@@ -2,7 +2,7 @@ from actions import search_info
 from config import Config
 from colorama import Fore, Style
 import json
-import openai
+from openai import OpenAI
 from selenium import webdriver
 from typing import List
 
@@ -11,7 +11,8 @@ SEARCH_PROMPTS = json.load(open(Config.SEARCH_PROMPT_PATH, "r"))
 model = Config.MODEL_NAME
 
 
-def search(selenium_session: webdriver, 
+def search(selenium_session: webdriver,
+           openai: OpenAI, 
            search_concept: str,
            visited_urls: List[str]):
     """
@@ -30,13 +31,13 @@ def search(selenium_session: webdriver,
     search_messages = [{"role": "system", "content": READ_PROMPTS["navigator_manifest"]},
                 {"role": "user", "content": SEARCH_PROMPTS["search_consideration"].format(search_concept, link_synopsis)}]
 
-    raw_search_link_num = openai.ChatCompletion.create(
+    raw_search_link_num = openai.chat.completions.create(
         model=model,
         temperature=0.8,
         messages=search_messages
     )
 
-    search_link_num = raw_search_link_num["choices"][0]["message"]["content"]
+    search_link_num = raw_search_link_num.choices[0].message.content
     
     assert search_link_num[-1].isdigit()
     link_index = int(search_link_num[-1])

@@ -3,6 +3,7 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
+from langchain_community.utilities import BingSearchAPIWrapper
 import time
 from trafilatura import extract
 from config import Config
@@ -57,6 +58,15 @@ def search_info(selenium_session: webdriver,
     
     link_synopsis = "\n".join([f"{i+1}. {link['text']}" for i, link in enumerate(search_links)])
     return (search_links, link_synopsis)
+
+
+def search_api(search_concept: str, 
+           num_results: int = 10):
+    """
+    Uses given search engine to look for a given concept by API
+    """
+    search = BingSearchAPIWrapper()
+    return search.results(search_concept, num_results=num_results)
 
 
 def get_links(selenium_session: webdriver):

@@ -1,3 +1,4 @@
 {
-    "search_consideration": "Given the search phrase {} and following snippets of the links: \n{}\n Give me the link number to follow. Format your answer in markdown as follows:\nlink_num: 1"
+    "search_consideration": "Given the search phrase {} and following snippets of the links: \n{}\n Give me the link number to follow. Format your answer in markdown as follows:\nlink_num: 1",
+    "search_consideration_api": "Given the search phrase {} and the {} following results as list of jsons:\n\n{}\n\nWhich link would you like to follow? Make resonable decision. Read all the snippets and return the choosen json. Do not return anything else."
 }

@@ -12,7 +12,8 @@ model = Config.MODEL_NAME
 
 def search(search_concept: str,
            openai: OpenAI, 
-           visited_urls: list):
+           visited_urls: list,
+           temp: float = 0.5):
     """
     Uses given search engine to look for a given concept
     """
@@ -21,12 +22,18 @@ def search(search_concept: str,
     filtered_results = [result for result in results if result["link"] not in visited_urls]
     len_results = str(len(filtered_results))
 
-    search_messages = [{"role": "system", "content": READ_PROMPTS["navigator_manifest"]},
-                       {"role": "user", "content": SEARCH_PROMPTS["search_consideration_api"].format(search_concept, len_results, filtered_results)}]
-    
+    search_messages = [{"role": "system",
+                     "content": [
+                          {"type": "text", "text": READ_PROMPTS["navigator_manifest"]}
+                    ]},
+                    {"role": "user",
+                     "content": [
+                          {"type": "text", "text": SEARCH_PROMPTS["search_consideration_api"].format(search_concept, len_results, filtered_results)}
+                    ]}]        
+            
     raw_decision = openai.chat.completions.create(
         model=model,
-        temperature=0.5,
+        temperature=temp,
         messages=search_messages,
         response_format={ "type": "json_object" }
     )

@@ -10,6 +10,6 @@ class Config:
     SEARCH_RESULTS = {"by": "id", "value": "react-layout"}
     SEARCH_LINKS = {"by": "tag name", "value": "li"}
     LINKS_ADRESS = {"by": "tag name", "value": "a"}
-    MODEL_NAME = "gpt-4-1106-preview"
+    MODEL_NAME = "gpt-4o"
     READ_PROMPT_PATH = "prompts/read_prompts.json"
     SEARCH_PROMPT_PATH = "prompts/search_prompts.json"

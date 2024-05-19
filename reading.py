@@ -30,9 +30,14 @@ def read(selenium_session: webdriver,
         links_to_follow = links_to_follow[:link_limit]
     texted_links_to_follow = "\n".join([f"{i+1}. {link[0]}, {link[1]}" for i, link in enumerate(links_to_follow)])
 
-    messages = [{"role": "system", "content": READ_PROMPTS["navigator_manifest"]},
-                {"role": "user", "content": READ_PROMPTS["reflection"].format(reading_url, text)}]
-
+    messages = [{"role": "system",
+                 "content": [
+                     {"type": "text", "text": READ_PROMPTS["navigator_manifest"]}
+                    ]},
+                    {"role": "user",
+                     "content": [
+                         {"type": "text", "text": READ_PROMPTS["reflection"].format(reading_url, text)}
+                    ]}]
 
     # Generates memories from the content of the page
     raw_page_memories = openai.chat.completions.create(
@@ -47,8 +52,8 @@ def read(selenium_session: webdriver,
     
     MEMORIES["theses"].append(structure_memory(page_memories, reading_url))
     
-    messages.append({"role": "assistant", "content": page_memories})
-    messages.append({"role": "user", "content": READ_PROMPTS["autoreflection"].format(page_memories)})
+    messages.append({"role": "assistant", "content": [{"type": "text", "text": page_memories}]})
+    messages.append({"role": "user", "content": [{"type": "text", "text": READ_PROMPTS["autoreflection"].format(page_memories)}]})
 
 
     # Generates the question to ask
@@ -64,15 +69,14 @@ def read(selenium_session: webdriver,
     print(Style.BRIGHT + Fore.YELLOW + current_question, end="\n\n")
     
     MEMORIES["questions"].append({reading_url: current_question})
-    messages.append({"role": "assistant", "content": current_question})
-    messages.append({"role": "user", "content": READ_PROMPTS["next_move_consideration"].format(current_question,
-                                                                            texted_links_to_follow)})
+    messages.append({"role": "assistant", "content": [{"type": "text", "text":current_question}]})
+    messages.append({"role": "user", "content": [{"type": "text", "text": READ_PROMPTS["next_move_consideration"].format(current_question, texted_links_to_follow)}]})
 
 
     # Make decision about the futher steps
     raw_decision = openai.chat.completions.create(
         model=model,
-        temperature=1,
+        temperature=temp,
         messages=messages,
         response_format={ "type": "json_object" }
     )

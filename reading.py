@@ -3,11 +3,12 @@ from openai import OpenAI
 from selenium import webdriver
 from actions import get_page_source, get_links, text_extract
 import json
-from memory import MEMORIES, structure_memory
+from memory import memorize
 from config import Config
 from colorama import Fore, Style
 from rich.console import Console
 from rich.markdown import Markdown
+from rich.panel import Panel
 
 READ_PROMPTS = json.load(open(Config.READ_PROMPT_PATH, "r"))
 model = Config.MODEL_NAME
@@ -15,7 +16,8 @@ console = Console()
 
 def read(selenium_session: webdriver, 
          openai: OpenAI,
-         reading_url: str, 
+         reading_url: str,
+         mem_dir: str, 
          link_limit: int = 100,
          temp: float = 0.5) -> dict:
     
@@ -46,11 +48,13 @@ def read(selenium_session: webdriver,
         messages=messages
     )
 
+    # Extracts the memories from the response
     page_memories = raw_page_memories.choices[0].message.content
-    console.print(Markdown(page_memories))
-    #print(Style.BRIGHT + Fore.LIGHTGREEN_EX + page_memories, end="\n\n")
-    
-    MEMORIES["theses"].append(structure_memory(page_memories, reading_url))
+    console.print(Panel(Markdown(page_memories)))
+    # Memorizes the memories
+    memorize(raw_memories=page_memories,
+             page_url=reading_url,
+             mem_dir=mem_dir)
     
     messages.append({"role": "assistant", "content": [{"type": "text", "text": page_memories}]})
     messages.append({"role": "user", "content": [{"type": "text", "text": READ_PROMPTS["autoreflection"].format(page_memories)}]})
@@ -68,7 +72,6 @@ def read(selenium_session: webdriver,
     
     print(Style.BRIGHT + Fore.YELLOW + current_question, end="\n\n")
     
-    MEMORIES["questions"].append({reading_url: current_question})
     messages.append({"role": "assistant", "content": [{"type": "text", "text":current_question}]})
     messages.append({"role": "user", "content": [{"type": "text", "text": READ_PROMPTS["next_move_consideration"].format(current_question, texted_links_to_follow)}]})
 

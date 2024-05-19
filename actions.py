@@ -15,7 +15,7 @@ ENCODING = tiktoken.encoding_for_model(Config.MODEL_NAME)
 
 def get_page_source(selenium_session: webdriver,
                     some_url: str,
-                    sleep_time: int=1) -> str:
+                    sleep_time: int=5) -> str:
     """
     Returns the page source of a given url
     """
@@ -29,35 +29,35 @@ def get_page_source(selenium_session: webdriver,
         return None
 
 
-def search_info(selenium_session: webdriver, 
-                search_concept: str,
-                visited_urls: List[str]) -> tuple:
-    """
-    Returns the links of a given search concept using a search engine
-    """
-    search_engine = Config.SERCH_ENGINE
-    selenium_session.get(search_engine)
-    try:
-        searchbox = selenium_session.find_element(by=Config.SEARCH_INPUT_CLASSIC["by"], 
-                                                        value=Config.SEARCH_INPUT_CLASSIC["value"])
-    except:
-        searchbox = selenium_session.find_element(by=Config.SEARCH_INPUT_INPUT["by"], 
-                                                        value=Config.SEARCH_INPUT_INPUT["value"])
-    searchbox.send_keys(search_concept)
-    searchbox.send_keys(Keys.ENTER)
-    results = selenium_session.find_element(by=Config.SEARCH_RESULTS["by"], 
-                                                   value=Config.SEARCH_RESULTS["value"])
-    search_links = results.find_elements(by=Config.SEARCH_LINKS["by"], 
-                                  value=Config.SEARCH_LINKS["value"])
+# def search_info(selenium_session: webdriver, 
+#                 search_concept: str,
+#                 visited_urls: List[str]) -> tuple:
+#     """
+#     Returns the links of a given search concept using a search engine
+#     """
+#     search_engine = Config.SERCH_ENGINE
+#     selenium_session.get(search_engine)
+#     try:
+#         searchbox = selenium_session.find_element(by=Config.SEARCH_INPUT_CLASSIC["by"], 
+#                                                         value=Config.SEARCH_INPUT_CLASSIC["value"])
+#     except:
+#         searchbox = selenium_session.find_element(by=Config.SEARCH_INPUT_INPUT["by"], 
+#                                                         value=Config.SEARCH_INPUT_INPUT["value"])
+#     searchbox.send_keys(search_concept)
+#     searchbox.send_keys(Keys.ENTER)
+#     results = selenium_session.find_element(by=Config.SEARCH_RESULTS["by"], 
+#                                                    value=Config.SEARCH_RESULTS["value"])
+#     search_links = results.find_elements(by=Config.SEARCH_LINKS["by"], 
+#                                   value=Config.SEARCH_LINKS["value"])
     
-    search_links = [{"text": link.text,
-                     "link": link,
-                     "adress": link.find_element(by=Config.LINKS_ADRESS["by"],
-                                                 value=Config.LINKS_ADRESS["value"]).get_attribute("href")} for link in search_links]
-    search_links = [link for link in search_links if link["adress"] not in visited_urls]
+#     search_links = [{"text": link.text,
+#                      "link": link,
+#                      "adress": link.find_element(by=Config.LINKS_ADRESS["by"],
+#                                                  value=Config.LINKS_ADRESS["value"]).get_attribute("href")} for link in search_links]
+#     search_links = [link for link in search_links if link["adress"] not in visited_urls]
     
-    link_synopsis = "\n".join([f"{i+1}. {link['text']}" for i, link in enumerate(search_links)])
-    return (search_links, link_synopsis)
+#     link_synopsis = "\n".join([f"{i+1}. {link['text']}" for i, link in enumerate(search_links)])
+#     return (search_links, link_synopsis)
 
 
 def search_api(search_concept: str, 

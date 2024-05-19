@@ -4,6 +4,7 @@ from langchain_community.utilities import BingSearchAPIWrapper
 from actions import search_api
 from openai import OpenAI
 from colorama import Fore, Style
+import time
 
 
 READ_PROMPTS = json.load(open(Config.READ_PROMPT_PATH, "r"))
@@ -13,7 +14,7 @@ model = Config.MODEL_NAME
 def search(search_concept: str,
            openai: OpenAI, 
            visited_urls: list,
-           temp: float = 0.5):
+           temp: float = 0.5) -> str:
     """
     Uses given search engine to look for a given concept
     """

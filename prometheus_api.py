@@ -1,5 +1,5 @@
-from reading import read
-from searching_api import search
+from modules.reading import read
+from modules.searching_api import search
 from session_manager import start_session
 from config import Config
 from fire import Fire

@@ -3,7 +3,7 @@ from openai import OpenAI
 from selenium import webdriver
 from actions import get_page_source, get_links, text_extract
 import json
-from memory import memorize
+from LongTermMem.memory import memorize
 from config import Config
 from colorama import Fore, Style
 from rich.console import Console

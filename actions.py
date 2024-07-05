@@ -8,9 +8,19 @@ import time
 from trafilatura import extract
 from config import Config
 import tiktoken
-from typing import List
+from typing import List, Any
+import json
+from openai import OpenAI
+import os
+from dotenv import load_dotenv
+from langchain_community.document_loaders import PyPDFLoader
 
 ENCODING = tiktoken.encoding_for_model(Config.MODEL_NAME)
+PDF_PROMPTS = json.load(open(Config.PDF_PROMPT_PATH, "r")) 
+MODEL = Config.MODEL_NAME
+load_dotenv()
+API_KEY = os.getenv("API_KEY")
+client = OpenAI(api_key=API_KEY)
 
 
 def get_page_source(selenium_session: webdriver,
@@ -104,3 +114,52 @@ def decide_SearchorLinks(link_num: str, what_to_search: str):
     decision = {"what_to_search": what_to_search,
                 "link_num": link_num}
     return decision
+
+def check_if_pdf(some_url: str) -> bool|dict:
+    """
+    Returns bool if the page is a pdf
+    """
+    try:
+        loader = PyPDFLoader(some_url)
+        pages = loader.load_and_split()
+        text = " ".join([p.page_content.replace("\n", " ") for p in pages])                      
+        return text
+    except:
+        return False
+
+
+def check_if_fullinfo(selenuim_session: webdriver,
+                      some_url: str,
+                      sleep_time: int=5) -> bool:
+
+    """
+    Returns bool if the page is a pdf abstract
+    """
+
+    try:
+        selenuim_session.get(some_url)
+        time.sleep(sleep_time)
+        main_body = selenuim_session.find_element(By.TAG_NAME, "main")
+        main_body_html = main_body.get_attribute("innerHTML")
+
+        messages = []
+        messages.append({"role": "assistant", "content": PDF_PROMPTS["role"]})
+        messages.append({"role": "user", "content": PDF_PROMPTS["full_info"].format(selenuim_session.current_url, 
+                                                                                    main_body_html,
+                                                                                    PDF_PROMPTS["json_page2pdf"])})
+        response = client.chat.completions.create(
+        model=MODEL,
+        temperature=0.1,
+        messages=messages,
+        response_format={ "type": "json_object" }
+        )
+        response_dict = json.loads(response.choices[0].message.content)
+        if response_dict["full_info"]:
+            return True
+        else:
+            return False
+    except Exception as e:
+        print(e)
+        return None
+
+                 

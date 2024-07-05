@@ -13,4 +13,5 @@ class Config:
     MODEL_NAME = "gpt-4o"
     READ_PROMPT_PATH = "prompts/read_prompts.json"
     SEARCH_PROMPT_PATH = "prompts/search_prompts.json"
+    PDF_PROMPT_PATH = "prompts/pdf_prompts.json"
     MEMORY_LOGS_PATH = "logs/"

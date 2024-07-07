@@ -3,7 +3,6 @@ from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
-from langchain_community.utilities import BingSearchAPIWrapper
 import time
 from trafilatura import extract
 from config import Config
@@ -14,13 +13,19 @@ from openai import OpenAI
 import os
 from dotenv import load_dotenv
 from langchain_community.document_loaders import PyPDFLoader
+from langchain_community.tools import BraveSearch
+from langchain_community.utilities import BingSearchAPIWrapper
+from colorama import Fore, Style
 
 ENCODING = tiktoken.encoding_for_model(Config.MODEL_NAME)
 PDF_PROMPTS = json.load(open(Config.PDF_PROMPT_PATH, "r")) 
 MODEL = Config.MODEL_NAME
 load_dotenv()
 API_KEY = os.getenv("API_KEY")
+BRAVE_KEY = os.getenv("BRAVE_KEY")
 client = OpenAI(api_key=API_KEY)
+
+
 
 
 def get_page_source(selenium_session: webdriver,
@@ -75,8 +80,10 @@ def search_api(search_concept: str,
     """
     Uses given search engine to look for a given concept by API
     """
-    search = BingSearchAPIWrapper()
-    return search.results(search_concept, num_results=num_results)
+    sercher = BraveSearch.from_api_key(api_key=BRAVE_KEY,
+                                    search_kwargs={"count": num_results})
+    search = json.loads(sercher.run(search_concept))
+    return search
 
 
 def get_links(selenium_session: webdriver):
@@ -115,16 +122,17 @@ def decide_SearchorLinks(link_num: str, what_to_search: str):
                 "link_num": link_num}
     return decision
 
-def check_if_pdf(some_url: str) -> bool|dict:
+def check_if_pdf(some_url: str) -> bool:
     """
     Returns bool if the page is a pdf
     """
     try:
         loader = PyPDFLoader(some_url)
-        pages = loader.load_and_split()
-        text = " ".join([p.page_content.replace("\n", " ") for p in pages])                      
-        return text
+        loader.load_and_split()
+        print(Fore.LIGHTCYAN_EX + "The page is a pdf")                      
+        return True
     except:
+        print(Fore.LIGHTCYAN_EX + "The page is not a pdf")
         return False
 
 
@@ -139,14 +147,20 @@ def check_if_fullinfo(selenuim_session: webdriver,
     try:
         selenuim_session.get(some_url)
         time.sleep(sleep_time)
-        main_body = selenuim_session.find_element(By.TAG_NAME, "main")
-        main_body_html = main_body.get_attribute("innerHTML")
-
-        messages = []
-        messages.append({"role": "assistant", "content": PDF_PROMPTS["role"]})
-        messages.append({"role": "user", "content": PDF_PROMPTS["full_info"].format(selenuim_session.current_url, 
+        main_body_html = get_html(selenuim_session)
+        messages = [{"role": "system",
+                 "content": [
+                     {"type": "text", "text": PDF_PROMPTS["role"]}
+                    ]},
+                    {"role": "user",
+                     "content": [
+                         {"type": "text", "text": PDF_PROMPTS["full_info"].format(selenuim_session.current_url, 
                                                                                     main_body_html,
-                                                                                    PDF_PROMPTS["json_page2pdf"])})
+                                                                                    PDF_PROMPTS["json_page2pdf"])}
+                                ]
+                    }
+                    ]
+        
         response = client.chat.completions.create(
         model=MODEL,
         temperature=0.1,
@@ -162,4 +176,32 @@ def check_if_fullinfo(selenuim_session: webdriver,
         print(e)
         return None
 
+def get_html(selenium_session: webdriver,
+             token_limit: int = 128000,
+             text_cut: int = 100000) -> str:
+    """
+    Returns the html of a given selenium session
+    """
+    full_html = selenium_session.page_source
+    token_num = len(ENCODING.encode(full_html))
+    if token_num >= token_limit:
+        html_text = full_html[:text_cut]
+    else:
+        html_text = full_html
+    return html_text        
+
+def limit_text(text: str,
+               token_limit: int = 128000,
+               text_cut: int = 100000) -> str:
+    """
+    Returns the text cut to the token limit
+    """
+    token_num = len(ENCODING.encode(text))
+    if token_num >= token_limit:
+        text = text[:text_cut]
+        print(Fore.YELLOW + "The text was cut to the token limit")
+    else:
+        print(Fore.YELLOW + "The text was not cut")
+        pass
+    return text
                  

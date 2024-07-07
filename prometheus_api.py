@@ -1,6 +1,8 @@
-from modules.reading import read
+from modules.reading import read, read_pdf
+from modules.validator import validate
 from modules.searching_api import search
 from session_manager import start_session
+from selenium.webdriver.common.by import By
 from config import Config
 from fire import Fire
 from typing import List
@@ -9,6 +11,7 @@ from openai import OpenAI
 import os
 import datetime
 import dotenv
+# exec inside the driver.get() method
 
 dotenv.load_dotenv()
 MEMORY_LOGS_PATH = Config.MEMORY_LOGS_PATH
@@ -28,29 +31,80 @@ def run_prometheus(headless: bool,
     mem_dir = f"logs/run_prometheus_{now}"
     os.makedirs(mem_dir)
     concept = input(Fore.GREEN + Style.BRIGHT + "What is the problem I should learn about: ")
-    readS = start_session(headless=headless)
+    driver = start_session(headless=headless)
     actual_url = search(search_concept=concept,
                         openai=client,
                         visited_urls=visited_urls)
     
     while True:
         
-        concept = read(selenium_session=readS,
-                       openai=client,
-                       reading_url=actual_url,
-                       mem_dir=mem_dir)
-        if request_sep in actual_url:
-            actual_url = actual_url.split("?")[0]
+        Content4Reading = validate(selenium_session=driver,
+                                   some_url=actual_url)
+        #PDF CASE!
+        if Content4Reading["type"] == "pdf":
+            # PURE PDF CASE!
+            if not Content4Reading["code"]:
+                concept = read_pdf(selenium_session=driver,
+                                   openai=client,
+                                   reading_url=actual_url,
+                                   mem_dir=mem_dir)
+                if request_sep in actual_url:
+                    actual_url = actual_url.split("?")[0]
+                else:
+                    pass
+                visited_urls.append(actual_url)
+                concept = concept["search_for"]
+                actual_url = search(search_concept=concept,
+                                                    openai=client,
+                                                    visited_urls=visited_urls)
+            # PDF WITH CODE CASE!
+            else:
+                print(Style.BRIGHT + Fore.GREEN + "CODE: " + Content4Reading["code"])
+                try:
+                    pdf_url = driver.find_element(By.XPATH, Content4Reading["code"]).get_attribute("href")
+                    actual_url = pdf_url
+                    concept = read_pdf(selenium_session=driver,
+                                    openai=client,
+                                    reading_url=actual_url,
+                                    mem_dir=mem_dir)
+                    if request_sep in actual_url:
+                        actual_url = actual_url.split("?")[0]
+                    else:
+                        pass
+                    visited_urls.append(actual_url)
+                    concept = concept["search_for"]
+                    actual_url = search(search_concept=concept,
+                                    openai=client,
+                                    visited_urls=visited_urls)
+                except Exception as e:
+                    print(e)
+                    print(Style.BRIGHT + Fore.RED + "The code could not be executed")
+                    if request_sep in actual_url:
+                        actual_url = actual_url.split("?")[0]
+                    else:
+                        pass
+                    visited_urls.append(actual_url)
+                    actual_url = search(search_concept=concept,
+                                    openai=client,
+                                    visited_urls=visited_urls)
+        #PAGE CASE!
         else:
-            pass
-        visited_urls.append(actual_url)
-        if concept["link2follow"]:
-             actual_url = concept["link2follow"]
-        elif concept["search_for"]:
-             concept = concept["search_for"]
-             actual_url = search(search_concept=concept,
-                                 openai=client,
-                                 visited_urls=visited_urls)
+            concept = read(selenium_session=driver,
+                           openai=client,
+                           reading_url=actual_url,
+                           mem_dir=mem_dir)
+            if request_sep in actual_url:
+                actual_url = actual_url.split("?")[0]
+            else:
+                pass
+            visited_urls.append(actual_url)
+            if concept["link2follow"]:
+                actual_url = concept["link2follow"]
+            elif concept["search_for"]:
+                concept = concept["search_for"]
+                actual_url = search(search_concept=concept,
+                                    openai=client,
+                                    visited_urls=visited_urls)
 
 if __name__ == "__main__":
     Fire(run_prometheus)

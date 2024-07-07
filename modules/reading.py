@@ -1,18 +1,81 @@
 
+import json
+import re
 from openai import OpenAI
 from selenium import webdriver
-from actions import get_page_source, get_links, text_extract
-import json
+from actions import get_page_source, get_links, text_extract, check_if_fullinfo, check_if_pdf
 from LongTermMem.memory import memorize
 from config import Config
 from colorama import Fore, Style
 from rich.console import Console
 from rich.markdown import Markdown
 from rich.panel import Panel
+from langchain_community.document_loaders import PyPDFLoader
 
 READ_PROMPTS = json.load(open(Config.READ_PROMPT_PATH, "r"))
 model = Config.MODEL_NAME
 console = Console()
+
+
+def read_pdf(selenium_session: webdriver,
+             openai: OpenAI,
+             reading_url: str,
+             mem_dir: str,
+             re_pattern: str = r"\s+", 
+             temp: float = 0.5) -> dict:
+    
+    try:
+        loader = PyPDFLoader(reading_url)
+        pages = loader.load_and_split()
+        pages_content = [re.sub(re_pattern, " ", p.page_content) for p in pages]
+        pdf_content = "\n".join(pages_content)
+    except Exception as e:
+        print(e)
+        return None
+
+    print(Style.BRIGHT+Fore.BLUE + f"I have loaded PDF!", end="\n\n")
+    
+    messages = [{"role": "system",
+                 "content": [
+                     {"type": "text", "text": READ_PROMPTS["navigator_manifest"]}
+                    ]},
+                    {"role": "user",
+                     "content": [
+                         {"type": "text", "text": READ_PROMPTS["reflection"].format(reading_url, pdf_content)}
+                    ]}]
+
+    # Generates memories from the content of the page
+    raw_page_memories = openai.chat.completions.create(
+        model=model,
+        temperature=temp,
+        messages=messages
+    )
+
+    # Extracts the memories from the response
+    page_memories = raw_page_memories.choices[0].message.content
+    console.print(Panel(Markdown(page_memories)))
+    # Memorizes the memories
+    memorize(raw_memories=page_memories,
+             page_url=reading_url,
+             mem_dir=mem_dir)
+    
+    messages.append({"role": "assistant", "content": [{"type": "text", "text": page_memories}]})
+    messages.append({"role": "user", "content": [{"type": "text", "text": READ_PROMPTS["autoreflection"].format(page_memories)}]})
+
+
+    # Generates the question to ask
+    generated_question = openai.chat.completions.create(
+        model=model,
+        temperature=temp,
+        messages=messages
+    )
+
+
+    current_question = generated_question.choices[0].message.content
+    
+    print(Style.BRIGHT + Fore.YELLOW + current_question, end="\n\n")
+    return {"search_for": current_question, "link2follow": None}
+
 
 def read(selenium_session: webdriver, 
          openai: OpenAI,
@@ -20,6 +83,8 @@ def read(selenium_session: webdriver,
          mem_dir: str, 
          link_limit: int = 100,
          temp: float = 0.5) -> dict:
+    
+    
     
     page_source = get_page_source(selenium_session=selenium_session, some_url=reading_url)
     text = text_extract(page_source)

@@ -1,6 +1,5 @@
 import json
 from config import Config
-from langchain_community.utilities import BingSearchAPIWrapper
 from actions import search_api
 from openai import OpenAI
 from colorama import Fore, Style

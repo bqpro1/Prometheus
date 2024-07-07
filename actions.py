@@ -169,8 +169,10 @@ def check_if_fullinfo(selenuim_session: webdriver,
         )
         response_dict = json.loads(response.choices[0].message.content)
         if response_dict["full_info"]:
+            print(Fore.LIGHTCYAN_EX + "The page is a full info")
             return True
         else:
+            print(Fore.LIGHTCYAN_EX + "The page is not a full info")
             return False
     except Exception as e:
         print(e)

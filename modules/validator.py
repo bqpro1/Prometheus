@@ -11,6 +11,7 @@ from dotenv import load_dotenv
 import rich
 from prompts.coding_prompts import role_message, user_message
 from rich.console import Console
+from colorama import Fore, Style
 
 console = Console()
 PDF_PROMPTS = json.load(open(Config.PDF_PROMPT_PATH, "r"))

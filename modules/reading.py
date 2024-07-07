@@ -3,7 +3,7 @@ import json
 import re
 from openai import OpenAI
 from selenium import webdriver
-from actions import get_page_source, get_links, text_extract, check_if_fullinfo, check_if_pdf
+from actions import get_page_source, get_links, text_extract, limit_text
 from LongTermMem.memory import memorize
 from config import Config
 from colorama import Fore, Style
@@ -29,6 +29,7 @@ def read_pdf(selenium_session: webdriver,
         pages = loader.load_and_split()
         pages_content = [re.sub(re_pattern, " ", p.page_content) for p in pages]
         pdf_content = "\n".join(pages_content)
+        pdf_content = limit_text(pdf_content)
     except Exception as e:
         print(e)
         return None

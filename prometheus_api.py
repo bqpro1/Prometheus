@@ -11,7 +11,7 @@ from openai import OpenAI
 import os
 import datetime
 import dotenv
-# exec inside the driver.get() method
+
 
 dotenv.load_dotenv()
 MEMORY_LOGS_PATH = Config.MEMORY_LOGS_PATH

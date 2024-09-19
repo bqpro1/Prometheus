@@ -25,9 +25,9 @@ The bot is in its infancy: no memory, no ability to modify its prompts, and no a
 2. **Activate the virtual environment**: `conda activate prometheus`.
 3. **Go to the root directory of the project**.
 4. **Run the prometheus script**: `python prometheus_api.py True` - for running the script in headless mode or `python prometheus_api.py False` - for running the script in non-headless mode.
-5. **The script will ask you to enter the starting website url**. For example:
+5. **The script will ask you to enter the starting fraze**. For example:
 
-![image](./media/terminal_screen.jpg)
+![image](./media/terminal_screen.png)
 
 ## TODO
 - [ ] Add memory to the bot. The bot should be able to remember what it reads and use that information to make decisions, change its prompts, and modify its source code. My view of Prometheus' memory is inspired by [this paper](https://arxiv.org/abs/2304.03442) with the addition of a graph-like structure.

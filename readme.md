@@ -12,23 +12,26 @@ The bot is in its infancy: no memory, no ability to modify its prompts, and no a
 ## Installation
 1. **Clone the repository**: `git clone git@github.com:bqpro1/Prometheus.git`
 2. **Install chrome driver (I did not test other drivers).**
-    - For Windows, download the driver from [here](https://googlechromelabs.github.io/chrome-for-testing/), and after extracting the zip file, copy the chromedriver.exe to the Windows folder.
+    - For Windows, download the driver from [here](https://googlechromelabs.github.io/chrome-for-testing/), and after extracting the zip file, copy the chromedriver.exe to the Windows folder.   
     - For macOS, the best way is to use brew: `brew install --cask chrome driver`. I also had to do [this](https://stackoverflow.com/questions/60362018/macos-catalinav-10-15-3-error-chromedriver-cannot-be-opened-because-the-de).
-3. **Create a virtual environment (I used conda)**: `conda create -n prometheus python=3.11`. 
-4. **Install the requirements: `pip install -r requirements.txt`**.
+3. **Make access to Brave Search API:**
+    - Create an account on [Brave Search API](https://brave.com/search/api/).
+    - Copy the API key to the `.env` file under the `BRAVE_KEY` variable.
+4. **Create a virtual environment (I used conda)**: `conda create -n prometheus python=3.11`. 
+5. **Install the requirements: `pip install -r requirements.txt`**.
 
 ## Usage
 1. **Paste your OpneAI API key in the `.env` file**.
 2. **Activate the virtual environment**: `conda activate prometheus`.
 3. **Go to the root directory of the project**.
-4. **Run the prometheus script**: `python prometheus.py True` - for running the script in headless mode or `python prometheus.py False` - for running the script in non-headless mode.
+4. **Run the prometheus script**: `python prometheus_api.py True` - for running the script in headless mode or `python prometheus_api.py False` - for running the script in non-headless mode.
 5. **The script will ask you to enter the starting website url**. For example:
 
 ![image](./media/terminal_screen.jpg)
 
 ## TODO
 - [ ] Add memory to the bot. The bot should be able to remember what it reads and use that information to make decisions, change its prompts, and modify its source code. My view of Prometheus' memory is inspired by [this paper](https://arxiv.org/abs/2304.03442) with the addition of a graph-like structure.
-- [ ] Add the ability to read PDF files from the web.
+- [X] Add the ability to read PDF files from the web.
 - [ ] Add the ability to read images from the web.
 - [ ] Add the ability to read videos from the web.
 - [ ] Make Prometheus more robust to website structure changes (using natural language from the page source code instead of rigid xpaths).

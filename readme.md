@@ -17,15 +17,19 @@ The bot is in its infancy: no memory, no ability to modify its prompts, and no a
 3. **Make access to Brave Search API:**
     - Create an account on [Brave Search API](https://brave.com/search/api/).
     - Copy the API key to the `.env` file under the `BRAVE_KEY` variable.
-4. **Create a virtual environment (I used conda)**: `conda create -n prometheus python=3.11`. 
-5. **Install the requirements: `pip install -r requirements.txt`**.
+4. **Set up environment variables:**
+    - Copy `.env.example` to `.env`: `cp .env.example .env`
+    - Fill in your API keys in the `.env` file:
+      - `API_KEY`: Your OpenAI API key
+      - `BRAVE_KEY`: Your Brave Search API key
+5. **Create a virtual environment (I used conda)**: `conda create -n prometheus python=3.11`. 
+6. **Install the requirements: `pip install -r requirements.txt`**.
 
 ## Usage
-1. **Paste your OpneAI API key in the `.env` file**.
-2. **Activate the virtual environment**: `conda activate prometheus`.
-3. **Go to the root directory of the project**.
-4. **Run the prometheus script**: `python prometheus_api.py True` - for running the script in headless mode or `python prometheus_api.py False` - for running the script in non-headless mode.
-5. **The script will ask you to enter the starting fraze**. For example:
+1. **Activate the virtual environment**: `conda activate prometheus`.
+2. **Go to the root directory of the project**.
+3. **Run the prometheus script**: `python prometheus_api.py True` - for running the script in headless mode or `python prometheus_api.py False` - for running the script in non-headless mode.
+4. **The script will ask you to enter the starting fraze**. For example:
 
 ![image](./media/terminal_screen.png)
 

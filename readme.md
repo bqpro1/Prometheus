@@ -28,7 +28,7 @@ The bot is in its infancy: no memory, no ability to modify its prompts, and no a
 ## Usage
 1. **Activate the virtual environment**: `conda activate prometheus`.
 2. **Go to the root directory of the project**.
-3. **Run the prometheus script**: `python prometheus_api.py True` - for running the script in headless mode or `python prometheus_api.py False` - for running the script in non-headless mode.
+3. **Run the script**: `python odysseus.py True` - for running the script in headless mode or `python odysseus.py False` - for running the script in non-headless mode.
 4. **The script will ask you to enter the starting fraze**. For example:
 
 ![image](./media/terminal_screen.png)

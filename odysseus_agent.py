@@ -15,6 +15,12 @@ from memory.memory_manager import memorize
 import asyncio
 from fire import Fire
 
+# Import prompts from Python modules
+from prompts.system_prompt import prompts as SYSTEM_PROMPTS
+from prompts.read_prompts import prompts as READ_PROMPTS
+from prompts.pdf_prompts import prompts as PDF_PROMPTS
+from prompts.search_prompts import prompts as SEARCH_PROMPTS
+
 # Initialize console for rich output
 console = Console()
 
@@ -23,9 +29,9 @@ load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY") or os.getenv("API_KEY")
 BRAVE_API_KEY = os.getenv("BRAVE_API_KEY") or os.getenv("BRAVE_KEY")
 
-# Load prompts
-with open("prompts/system_prompt.json", "r") as f:
-    SYSTEM_PROMPTS = json.load(f)
+# No longer need to load JSON files
+# with open("prompts/system_prompt.json", "r") as f:
+#     SYSTEM_PROMPTS = json.load(f)
 
 class OdysseusAgent:
     def __init__(self, model_name: str = "gpt-4o"):

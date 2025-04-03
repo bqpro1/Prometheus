@@ -2,7 +2,7 @@
 graph TD
     %% Main Application
     A[Prometheus] --> B[prometheus.py]
-    A --> C[prometheus_api.py]
+    A --> C[odysseus.py]
     
     %% Core Components
     B --> D[Session Management]

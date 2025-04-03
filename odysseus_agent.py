@@ -65,7 +65,7 @@ class OdysseusAgent:
                 print(f"{Style.BRIGHT}{Fore.BLUE}Searching for: {context['current_concept']}{Style.RESET_ALL}\n")
                 
                 # Construct the prompt for searching
-                search_prompt = SYSTEM_PROMPTS["search_consideration"].format(context["current_concept"])
+                search_prompt = SYSTEM_PROMPTS["search_consideration"].format(search_query=context["current_concept"])
                 
                 # Run the agent to get search results and decide which to follow
                 result = await Runner.run(
@@ -99,7 +99,7 @@ class OdysseusAgent:
                 context["visited_urls"] = self.visited_urls
                 
                 # Construct the prompt for reading the page
-                reading_prompt = SYSTEM_PROMPTS["reflection"].format(url)
+                reading_prompt = SYSTEM_PROMPTS["reflection"].format(current_url=url)
                 
                 # Run the agent to read and analyze the page
                 result = await Runner.run(

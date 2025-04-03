@@ -274,9 +274,118 @@ Return your suggestion as a simple string (no explanation needed)."""
                         context["current_concept"] = initial_concept
                         context["current_url"] = None
                 else:
-                    print(f"{Style.BRIGHT}{Fore.RED}Invalid response format. Starting new search.{Style.RESET_ALL}\n")
-                    context["current_concept"] = initial_concept
-                    context["current_url"] = None
+                    # Try to extract useful information from non-dictionary responses
+                    response_text = str(result.final_output)
+                    print(f"{Style.BRIGHT}{Fore.YELLOW}Trying to parse response: {response_text[:100]}...{Style.RESET_ALL}\n")
+                    
+                    # Try to extract a JSON dictionary
+                    try:
+                        if '{' in response_text and '}' in response_text:
+                            # Find the JSON part of the response
+                            json_start = response_text.find('{')
+                            json_end = response_text.rfind('}') + 1
+                            json_str = response_text[json_start:json_end]
+                            
+                            # Try to parse it
+                            parsed_dict = json.loads(json_str)
+                            print(f"{Style.BRIGHT}{Fore.GREEN}Successfully extracted JSON: {parsed_dict}{Style.RESET_ALL}\n")
+                            
+                            # Process the extracted dictionary
+                            if "search_for" in parsed_dict and parsed_dict["search_for"]:
+                                context["current_concept"] = parsed_dict["search_for"]
+                                context["current_url"] = None
+                                print(f"{Style.BRIGHT}{Fore.YELLOW}Next: Searching for {context['current_concept']}{Style.RESET_ALL}\n")
+                                return
+                            elif "link_to_follow" in parsed_dict and parsed_dict["link_to_follow"]:
+                                context["current_url"] = parsed_dict["link_to_follow"]
+                                print(f"{Style.BRIGHT}{Fore.YELLOW}Next: Following link to {context['current_url']}{Style.RESET_ALL}\n")
+                                return
+                    except Exception as e:
+                        print(f"{Style.BRIGHT}{Fore.RED}Failed to parse JSON: {str(e)}{Style.RESET_ALL}\n")
+                    
+                    # Look for keywords that might indicate intent
+                    lower_text = response_text.lower()
+                    
+                    # Check if it mentions searching for something
+                    search_indicators = ["search for", "search about", "look up", "find information about", "research"]
+                    for indicator in search_indicators:
+                        if indicator in lower_text:
+                            # Try to extract the search term
+                            index = lower_text.find(indicator) + len(indicator)
+                            # Get the rest of the sentence
+                            rest = response_text[index:].strip()
+                            # Extract until the end of the sentence or a reasonable length
+                            end_markers = ['.', '!', '?', '\n']
+                            end_pos = min(
+                                (rest.find(m) for m in end_markers if rest.find(m) > 0), 
+                                default=min(50, len(rest))
+                            )
+                            search_term = rest[:end_pos].strip()
+                            
+                            if search_term and len(search_term) > 3:
+                                context["current_concept"] = search_term
+                                context["current_url"] = None
+                                print(f"{Style.BRIGHT}{Fore.YELLOW}Extracted search term: {search_term}{Style.RESET_ALL}\n")
+                                return
+                    
+                    # Check if it mentions following a link
+                    url_match = re.search(r'https?://[^\s()<>"\'\[\]]+', response_text)
+                    if url_match:
+                        url = url_match.group(0)
+                        context["current_url"] = url
+                        context["current_concept"] = None
+                        print(f"{Style.BRIGHT}{Fore.YELLOW}Found URL to follow: {url}{Style.RESET_ALL}\n")
+                        return
+                        
+                    # Check for related topics in the text
+                    if self.explored_topics:
+                        # Try to find related topics in the response
+                        for topic in self.explored_topics:
+                            if topic.lower() in lower_text:
+                                related_index = lower_text.find(topic.lower())
+                                context_before = lower_text[max(0, related_index-30):related_index]
+                                if "related" in context_before or "similar" in context_before:
+                                    print(f"{Style.BRIGHT}{Fore.YELLOW}Continuing with related topic: {topic}{Style.RESET_ALL}\n")
+                                    context["current_concept"] = topic
+                                    context["current_url"] = None
+                                    return
+                    
+                    # If all else fails, retry with a more explicit prompt
+                    print(f"{Style.BRIGHT}{Fore.RED}Couldn't parse response. Trying again with a clearer prompt.{Style.RESET_ALL}\n")
+                    
+                    fallback_prompt = """
+I need you to decide what to do next. Please respond ONLY with one of these two options:
+1. A JSON with a search query like this: {"search_for": "topic to search", "link_to_follow": ""}
+2. A JSON with a URL to follow like this: {"search_for": "", "link_to_follow": "https://example.com/page"}
+
+Your response must be a valid JSON object with these exact keys. Do not include any other text.
+"""
+                    
+                    # Try again with the clearer prompt
+                    retry_result = await Runner.run(
+                        self.agent,
+                        fallback_prompt,
+                        context=context
+                    )
+                    
+                    if isinstance(retry_result.final_output, dict):
+                        if "search_for" in retry_result.final_output and retry_result.final_output["search_for"]:
+                            context["current_concept"] = retry_result.final_output["search_for"]
+                            context["current_url"] = None
+                            print(f"{Style.BRIGHT}{Fore.GREEN}Retry successful! Next: Searching for {context['current_concept']}{Style.RESET_ALL}\n")
+                        elif "link_to_follow" in retry_result.final_output and retry_result.final_output["link_to_follow"]:
+                            context["current_url"] = retry_result.final_output["link_to_follow"]
+                            print(f"{Style.BRIGHT}{Fore.GREEN}Retry successful! Next: Following link to {context['current_url']}{Style.RESET_ALL}\n")
+                        else:
+                            # If still no valid response, fall back to continuing with the initial concept
+                            print(f"{Style.BRIGHT}{Fore.RED}Still unclear what to do next. Continuing with original topic.{Style.RESET_ALL}\n")
+                            context["current_concept"] = initial_concept
+                            context["current_url"] = None
+                    else:
+                        # Last resort: just continue with the initial concept
+                        print(f"{Style.BRIGHT}{Fore.RED}Invalid response format. Starting new search with original topic.{Style.RESET_ALL}\n")
+                        context["current_concept"] = initial_concept
+                        context["current_url"] = None
     
     def get_session_summary(self, concept: str, start_time: datetime.datetime, model: str):
         """

@@ -42,16 +42,16 @@ When choosing links, prioritize:
 2. Diverse perspectives (avoid similar sources or topics you've already explored)
 3. Primary sources over secondary summaries
 
-If you choose to follow a link, provide the full URL in your response. If you choose to search, specify the search query.
+IMPORTANT: Your response MUST be a valid JSON object with EXACTLY these two keys:
+- "search_for": your search query if you decide to search (leave empty string if following a link)
+- "link_to_follow": the URL to follow if you decide to follow a link (leave empty string if searching)
 
-Respond with a JSON object with two possible keys:
-- "search_for": your search query if you decide to search (leave empty if following a link)
-- "link_to_follow": the URL to follow if you decide to follow a link (leave empty if searching)
-
-For example:
+Examples of valid responses:
 {{"search_for": "machine learning applications in healthcare", "link_to_follow": ""}}
 OR
-{{"search_for": "", "link_to_follow": "https://example.com/some-interesting-page"}}"""
+{{"search_for": "", "link_to_follow": "https://example.com/some-interesting-page"}}
+
+Do not include any text outside of the JSON object. Do not include explanations or additional comments."""
 
 # Prompt for evaluating search results and choosing a link to explore
 search_consideration = """You need to search for information about: {search_query}

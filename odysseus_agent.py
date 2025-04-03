@@ -70,8 +70,18 @@ class OdysseusAgent:
             if context["current_concept"] and not context["current_url"]:
                 print(f"{Style.BRIGHT}{Fore.BLUE}Searching for: {context['current_concept']}{Style.RESET_ALL}\n")
                 
-                # Construct the prompt for searching
-                search_prompt = SYSTEM_PROMPTS["search_consideration"].format(search_query=context["current_concept"])
+                # Print the keys in SYSTEM_PROMPTS for debugging
+                print(f"SYSTEM_PROMPTS keys: {list(SYSTEM_PROMPTS.keys())}")
+                print(f"SEARCH_PROMPTS keys: {list(SEARCH_PROMPTS.keys())}")
+                
+                try:
+                    # Construct the prompt for searching
+                    search_prompt = SYSTEM_PROMPTS["search_consideration"].format(search_query=context["current_concept"])
+                except Exception as e:
+                    print(f"Error formatting search prompt: {e}")
+                    print(f"SYSTEM_PROMPTS search_consideration: {repr(SYSTEM_PROMPTS['search_consideration'])}")
+                    # Fallback to a simple prompt
+                    search_prompt = f"Search for information about: {context['current_concept']}. Return a JSON with a 'url' field."
                 
                 # Run the agent to get search results and decide which to follow
                 result = await Runner.run(
@@ -80,6 +90,10 @@ class OdysseusAgent:
                     context=context
                 )
                 
+                # Debug the search result
+                print(f"Search result type: {type(result.final_output)}")
+                print(f"Search result: {result.final_output}")
+                
                 # Update context with agent's response - expecting a URL to follow
                 if isinstance(result.final_output, dict) and "url" in result.final_output:
                     context["current_url"] = result.final_output["url"]
@@ -87,6 +101,21 @@ class OdysseusAgent:
                 else:
                     # If we didn't get a URL, try to extract it from text response
                     response_text = result.final_output if isinstance(result.final_output, str) else str(result.final_output)
+                    
+                    # Try to parse as JSON if it's a string that looks like JSON
+                    try:
+                        if isinstance(response_text, str) and '{' in response_text and '}' in response_text:
+                            import json
+                            json_start = response_text.find('{')
+                            json_end = response_text.rfind('}') + 1
+                            json_str = response_text[json_start:json_end]
+                            json_data = json.loads(json_str)
+                            if "url" in json_data:
+                                context["current_url"] = json_data["url"]
+                                context["current_concept"] = None
+                    except:
+                        pass
+                        
                     # Find a URL in the text (simple extraction, could be improved)
                     import re
                     urls = re.findall(r'https?://\S+', response_text)

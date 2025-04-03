@@ -54,8 +54,8 @@ Use your Brave Search tool to find relevant results. After reviewing the search 
 2. Relevance to your current learning goals
 3. Potential for new, valuable information
 
-Respond with a JSON object containing the URL you want to visit:
-{"url": "https://example.com/selected-page"}"""
+Respond with a JSON object containing the URL you want to visit like this:
+{{"url": "the-url-to-visit"}}"""
 
 # Export all prompts as a dictionary for backwards compatibility with JSON loading
 prompts = {

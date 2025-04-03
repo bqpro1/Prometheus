@@ -34,6 +34,14 @@ next_action = """Based on what you've just learned, decide what to do next:
 
 Extract links from the current page using your tools first. Then decide which action would be most valuable for building your knowledge.
 
+You have already visited these URLs (don't revisit them):
+{visited_urls}
+
+When choosing links, prioritize:
+1. Academic and scientific sources
+2. Diverse perspectives (avoid similar sources or topics you've already explored)
+3. Primary sources over secondary summaries
+
 If you choose to follow a link, provide the full URL in your response. If you choose to search, specify the search query.
 
 Respond with a JSON object with two possible keys:
@@ -41,9 +49,9 @@ Respond with a JSON object with two possible keys:
 - "link_to_follow": the URL to follow if you decide to follow a link (leave empty if searching)
 
 For example:
-{"search_for": "machine learning applications in healthcare", "link_to_follow": ""}
+{{"search_for": "machine learning applications in healthcare", "link_to_follow": ""}}
 OR
-{"search_for": "", "link_to_follow": "https://example.com/some-interesting-page"}"""
+{{"search_for": "", "link_to_follow": "https://example.com/some-interesting-page"}}"""
 
 # Prompt for evaluating search results and choosing a link to explore
 search_consideration = """You need to search for information about: {search_query}
